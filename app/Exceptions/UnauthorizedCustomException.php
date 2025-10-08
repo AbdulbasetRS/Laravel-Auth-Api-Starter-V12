@@ -5,7 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use App\Traits\ApiResponseTrait;
 
-class UnauthorizedException extends Exception
+class UnauthorizedCustomException extends Exception
 {
     use ApiResponseTrait;
 
