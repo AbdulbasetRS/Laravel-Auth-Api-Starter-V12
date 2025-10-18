@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Profile;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -48,20 +48,20 @@ class UserSeeder extends Seeder
             'username' => 'user',
             'slug' => 'user',
             'email' => 'user@example.com',
-            'mobile_number' => '01' . rand(100000000, 999999999),
+            'mobile_number' => '01'.rand(100000000, 999999999),
             'password' => Hash::make('123456789'),
             'status' => 'active',
             'type' => 'user',
             'can_login' => true,
             'email_verified_at' => now(),
         ]);
-        $user->profile()->create(Profile::factory()->make()->toArray());
+        $user->profile()->create(Profile::factory()->raw());
 
         User::factory()
             ->count(20)
             ->create()
             ->each(function ($user) {
-                $user->profile()->create(Profile::factory()->make()->toArray());
+                $user->profile()->create(Profile::factory()->raw());
             });
     }
 }

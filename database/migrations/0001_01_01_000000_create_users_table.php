@@ -41,6 +41,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('role_id')->nullable();
             $table->text('fcm_token')->nullable();
+            $table->uuid('qr_code')->unique();
             $table->rememberToken();
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users', 'id')->onDelete('set null');

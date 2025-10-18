@@ -17,7 +17,6 @@ class Profile extends Model
         'first_name',
         'middle_name',
         'last_name',
-        'full_name',
         'whatapp_number',
         'telegram_number',
         'date_of_birth',
@@ -33,7 +32,7 @@ class Profile extends Model
     ];
 
     protected $hidden = [
-
+        // 
     ];
     
     protected $touches = ['user'];

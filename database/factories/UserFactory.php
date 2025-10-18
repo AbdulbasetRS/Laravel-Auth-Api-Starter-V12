@@ -37,6 +37,7 @@ class UserFactory extends Factory
             'status_details' => null,
             'email_verified_at' => now(),
             'role_id' => null,
+            'qr_code' => (string) Str::uuid(),
             'remember_token' => Str::random(10),
             'created_by' => User::inRandomOrder()->value('id'),
             'updated_by' => $updatedBy ? User::inRandomOrder()->value('id') : null,
