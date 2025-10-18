@@ -12,7 +12,7 @@ use App\Enums\UserType;
 
 class User extends Authenticatable implements JWTSubject
 {
-     use HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'users';
 
@@ -44,6 +44,8 @@ class User extends Authenticatable implements JWTSubject
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     protected $with = [
         'profile',

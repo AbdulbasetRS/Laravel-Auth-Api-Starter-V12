@@ -35,6 +35,10 @@ class Profile extends Model
     protected $hidden = [
 
     ];
+    
+    protected $touches = ['user'];
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     protected $appends = [
         'full_name',
