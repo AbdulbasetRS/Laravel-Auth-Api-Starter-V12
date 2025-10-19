@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V2\Admin;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -99,10 +100,32 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $login = $request->identifier;
+        $password = $request->password;
 
-        if (! $token = Auth::attempt($credentials)) {
-            return $this->error(__('messages.invalid_credentials'), 401);
+        // تحديد نوع الحقل (email أو mobile_number أو username)
+        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : (is_numeric($login) ? 'mobile_number' : 'username');
+
+        // البحث عن المستخدم
+        $user = User::where($fieldType, $login)->first();
+
+        if (! $user) {
+            return $this->error(__('auth.invalid_credentials'), 401);
+        }
+
+        if (! $user->can_login) {
+            return $this->error(__('auth.cannot_login'), 403);
+        }
+
+        if ($user->status !== UserStatus::Active) {
+            return $this->error(__('auth.account_not_active'), 403);
+        }
+
+        // محاولة تسجيل الدخول عبر JWT
+        if (! $token = Auth::attempt([$fieldType => $login, 'password' => $password])) {
+            return $this->error(__('auth.invalid_credentials'), 401);
         }
 
         return $this->success([
@@ -110,6 +133,6 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
             'user' => Auth::user(),
-        ], __('messages.login_success'));
+        ], __('auth.login_success'));
     }
 }

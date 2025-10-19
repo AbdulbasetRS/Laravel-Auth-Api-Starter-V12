@@ -7,11 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -111,13 +109,10 @@ class AuthController extends Controller
         $login = $request->identifier;
         $password = $request->password;
 
-        // تحديد نوع الحقل (email أو mobile_number أو username)
-        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : (is_numeric($login) ? 'mobile_number' : 'username');
-
-        // البحث عن المستخدم
-        $user = User::where($fieldType, $login)->first();
+        $user = User::where('email', $login)
+            ->orWhere('username', $login)
+            ->orWhere('mobile_number', $login)
+            ->first();
 
         if (! $user) {
             return $this->error(__('auth.invalid_credentials'), 401);
@@ -131,16 +126,20 @@ class AuthController extends Controller
             return $this->error(__('auth.account_not_active'), 403);
         }
 
-        // محاولة تسجيل الدخول عبر JWT
-        if (! $token = Auth::attempt([$fieldType => $login, 'password' => $password])) {
+        if (! Hash::check($password, $user->password)) {
             return $this->error(__('auth.invalid_credentials'), 401);
         }
+
+        /** @var \Tymon\JWTAuth\JWTGuard $guard */
+        $guard = Auth::guard('api');
+        $token = $guard->login($user);
+
 
         return $this->success([
             'token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60,
-            'user' => Auth::user(),
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => $user,
         ], __('auth.login_success'));
     }
 }
